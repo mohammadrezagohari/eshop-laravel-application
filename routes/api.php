@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Auth\RegisterController;
 use App\Http\Controllers\API\BasketController;
 use App\Http\Controllers\API\CardController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,3 +51,22 @@ Route::group(['as' => 'users', 'prefix' => 'users'], function () {
     Route::get('/active/{id}', [UserController::class, 'show'])->name('show');
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::group(['as' => 'tickets', 'prefix' => 'tickets'], function () {
+        Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/{id}', [TicketController::class, 'show'])->name('show');
+        Route::patch('/{id}/close', [TicketController::class, 'close'])->name('close');
+    });
+
+    Route::middleware('role:seller,admin')->group(function () {
+        Route::get('/seller/products', [ProductController::class, 'sellerIndex'])->name('seller.products.index');
+        Route::get('/staff/tickets', [TicketController::class, 'staffIndex'])->name('staff.tickets.index');
+        Route::patch('/staff/tickets/{id}/reply', [TicketController::class, 'reply'])->name('staff.tickets.reply');
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products.index');
+        Route::patch('/admin/users/{id}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
+    });
+});

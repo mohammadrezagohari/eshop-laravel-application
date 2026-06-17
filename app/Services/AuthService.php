@@ -15,6 +15,7 @@ class AuthService
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required',
+            'role' => 'sometimes|in:' . User::ROLE_CUSTOMER . ',' . User::ROLE_SELLER,
         ]);
 
         if ($validator->fails()) {
@@ -25,6 +26,7 @@ class AuthService
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => $data['role'] ?? User::ROLE_CUSTOMER,
         ]);
 
         $token = $user->createToken($user->email, ['*']);
@@ -32,6 +34,7 @@ class AuthService
         return [
             'token' => $token->plainTextToken,
             'name' => $user->name,
+            'role' => $user->role,
             'message' => 'register successfully',
         ];
     }
@@ -60,6 +63,7 @@ class AuthService
         return [
             'token' => $token->plainTextToken,
             'name' => $user->name,
+            'role' => $user->role,
             'message' => 'login successfully',
         ];
     }

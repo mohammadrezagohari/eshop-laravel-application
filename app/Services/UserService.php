@@ -22,4 +22,9 @@ class UserService
     {
         return $this->users->show($id);
     }
+
+    public function updateRole($id, string $role)
+    {
+        return $this->users->updateRole($id, $role);
+    }
 }

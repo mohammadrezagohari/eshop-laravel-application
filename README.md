@@ -5,10 +5,13 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 ## Highlights
 
 - Token-based authentication with Laravel Sanctum.
+- Role-based access for customers, sellers, and admins.
 - Register, login, logout, and authenticated user endpoints.
 - Product listing and product detail endpoints.
+- Seller product ownership endpoints.
 - Basket flow for guest or authenticated customers using user identity or cookie identity.
 - Basket item add, list, update, view, and delete operations.
+- Ticket support flow with customer tickets and staff replies.
 - Checkout-oriented database design with cards, card products, addresses, and payments.
 - Invoice notification endpoints backed by Laravel notifications.
 - Repository and service layers around core basket, product, card, user, and auth logic.
@@ -40,6 +43,8 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 | --- | --- | --- |
 | `GET` | `/api/products` | List visible products |
 | `GET` | `/api/products/show/{id}` | Show a product detail |
+| `GET` | `/api/seller/products` | List products owned by the authenticated seller |
+| `GET` | `/api/admin/products` | List all products for admins |
 
 ### Basket Flow
 
@@ -58,17 +63,38 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 | `GET` | `/api/card/send-notification/{id}` | Send an invoice notification for a card |
 | `GET` | `/api/card/get-notification/{id}` | Retrieve card notifications |
 
+### Access Control
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `PATCH` | `/api/admin/users/{id}/role` | Update a user role as an admin |
+
+Supported roles are `customer`, `seller`, and `admin`.
+
+### Tickets
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/tickets` | List the authenticated user's tickets |
+| `POST` | `/api/tickets` | Create a support ticket |
+| `GET` | `/api/tickets/{id}` | Show a ticket available to the current user |
+| `PATCH` | `/api/tickets/{id}/close` | Close a ticket |
+| `GET` | `/api/staff/tickets` | List tickets for admins and sellers |
+| `PATCH` | `/api/staff/tickets/{id}/reply` | Reply to a ticket as admin or seller |
+
 ## Database Design
 
 The schema separates commerce concerns into focused tables:
 
 - `users` and `personal_access_tokens` for authentication.
+- `users.role` for customer, seller, and admin access control.
 - `products`, `categories`, `details`, `prices`, and `category_product` for catalog data.
 - `baskets` and `basket_product` for basket state and item quantities.
 - `cards` and `card_product` for checkout snapshots.
 - `addresses` for customer delivery data.
 - `payments` for payment records, including bank name, tracking code, amount, status, and card linkage.
 - `notifications` for invoice notification history.
+- `tickets` for customer support requests, staff assignments, replies, status, and priority.
 
 ## API Documentation
 
@@ -94,7 +120,7 @@ Run the feature test suite with:
 php artisan test
 ```
 
-The current tests cover authentication, basket operations, card notifications, product endpoints, and user endpoints.
+The current tests cover authentication, role access, basket operations, card notifications, product endpoints, tickets, and user endpoints.
 
 ## License
 

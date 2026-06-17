@@ -22,4 +22,14 @@ class ProductService
     {
         return $this->products->showActive($id);
     }
+
+    public function listForSeller($user)
+    {
+        return $this->products->listForSeller($user);
+    }
+
+    public function listAll()
+    {
+        return $this->products->listAll();
+    }
 }

@@ -52,6 +52,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
+    public const ROLE_CUSTOMER = 'customer';
+    public const ROLE_SELLER = 'seller';
+    public const ROLE_ADMIN = 'admin';
+
     /**
      * Bootstrap any application services.
      *
@@ -69,6 +73,7 @@ class User extends Authenticatable
         'email',
         'password',
         'active',
+        'role',
     ];
 
     /**
@@ -88,6 +93,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'active' => 'boolean',
     ];
 
     #endregion
@@ -109,5 +115,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
+
+    public function Tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    public function AssignedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'assigned_to');
+    }
     #endregion
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->role === self::ROLE_SELLER;
+    }
+
+    public function hasRole(array $roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
 }

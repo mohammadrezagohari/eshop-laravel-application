@@ -31,5 +31,22 @@ class EloquentProductRepository implements IEloquentProductRepository
         );
     }
 
+    public function listForSeller($user)
+    {
+        $query = Product::orderByDesc('id');
+
+        if (!$user->isAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        return ProductListResource::collection($query->get());
+    }
+
+    public function listAll()
+    {
+        return ProductListResource::collection(
+            Product::orderByDesc('id')->get()
+        );
+    }
 
 }

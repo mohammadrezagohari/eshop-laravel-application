@@ -23,4 +23,14 @@ class ProductController extends Controller
     {
         return $this->productService->showActive($id);
     }
+
+    public function sellerIndex()
+    {
+        return $this->productService->listForSeller(request()->user());
+    }
+
+    public function adminIndex()
+    {
+        return $this->productService->listAll();
+    }
 }

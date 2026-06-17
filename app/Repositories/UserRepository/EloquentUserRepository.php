@@ -16,4 +16,12 @@ class EloquentUserRepository implements IEloquentUserRepository
     {
         return User::findOrFail($id);
     }
+
+    public function updateRole($id, string $role)
+    {
+        $user = User::findOrFail($id);
+        $user->update(['role' => $role]);
+
+        return $user->refresh();
+    }
 }
