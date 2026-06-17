@@ -22,6 +22,34 @@ class RoleAccessTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_customer_cannot_access_admin_products()
+    {
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        Sanctum::actingAs($customer);
+
+        $response = $this->getJson('/api/admin/products');
+
+        $response->assertForbidden();
+    }
+
+    public function test_seller_cannot_update_user_role()
+    {
+        $seller = User::factory()->create(['role' => User::ROLE_SELLER]);
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        Sanctum::actingAs($seller);
+
+        $response = $this->patchJson('/api/admin/users/' . $customer->id . '/role', [
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $customer->id,
+            'role' => User::ROLE_CUSTOMER,
+        ]);
+    }
+
     public function test_seller_can_list_own_products()
     {
         $seller = User::factory()->create(['role' => User::ROLE_SELLER]);
@@ -65,5 +93,24 @@ class RoleAccessTest extends TestCase
             'id' => $user->id,
             'role' => User::ROLE_SELLER,
         ]);
+    }
+
+    public function test_admin_can_list_all_products()
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $seller = User::factory()->create(['role' => User::ROLE_SELLER]);
+        $otherSeller = User::factory()->create(['role' => User::ROLE_SELLER]);
+
+        $firstProduct = Product::factory()->create(['user_id' => $seller->id]);
+        $secondProduct = Product::factory()->create(['user_id' => $otherSeller->id]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/admin/products');
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment(['id' => $firstProduct->id])
+            ->assertJsonFragment(['id' => $secondProduct->id]);
     }
 }

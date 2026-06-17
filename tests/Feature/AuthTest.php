@@ -37,6 +37,43 @@ class AuthTest extends TestCase
         ]);
     }
 
+    public function test_register_can_create_a_seller_user()
+    {
+        $response = $this->post('/api/auth/register', [
+            'email' => 'seller@example.com',
+            'name' => 'seller user',
+            'password' => '12345678',
+            'role' => User::ROLE_SELLER,
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('role', User::ROLE_SELLER);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'seller@example.com',
+            'role' => User::ROLE_SELLER,
+        ]);
+    }
+
+    public function test_register_rejects_admin_role()
+    {
+        $response = $this->post('/api/auth/register', [
+            'email' => 'admin@example.com',
+            'name' => 'admin user',
+            'password' => '12345678',
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $response
+            ->assertStatus(400)
+            ->assertJsonStructure(['validationError']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'admin@example.com',
+        ]);
+    }
+
     public function test_register_validation_errors_return_bad_request()
     {
         $response = $this->post('/api/auth/register', [

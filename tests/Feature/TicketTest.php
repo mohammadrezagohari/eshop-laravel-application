@@ -34,6 +34,30 @@ class TicketTest extends TestCase
         ]);
     }
 
+    public function test_guest_cannot_create_ticket()
+    {
+        $response = $this->postJson('/api/tickets', [
+            'subject' => 'Payment issue',
+            'message' => 'I need support for my order.',
+        ]);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_ticket_create_requires_subject_and_message()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/tickets', [
+            'priority' => Ticket::PRIORITY_HIGH,
+        ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['subject', 'message']);
+    }
+
     public function test_user_cannot_view_another_users_ticket()
     {
         $owner = User::factory()->create();
@@ -71,6 +95,45 @@ class TicketTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.status', Ticket::STATUS_ANSWERED)
             ->assertJsonPath('data.assignee.id', $seller->id);
+    }
+
+    public function test_customer_cannot_reply_to_ticket_as_staff()
+    {
+        $owner = User::factory()->create();
+        $customer = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        $ticket = Ticket::create([
+            'user_id' => $owner->id,
+            'subject' => 'Order question',
+            'message' => 'Where is my order?',
+        ]);
+
+        Sanctum::actingAs($customer);
+
+        $response = $this->patchJson('/api/staff/tickets/' . $ticket->id . '/reply', [
+            'response' => 'Fake staff response.',
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_can_list_staff_tickets()
+    {
+        $owner = User::factory()->create();
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $ticket = Ticket::create([
+            'user_id' => $owner->id,
+            'subject' => 'Admin visible ticket',
+            'message' => 'Please check this.',
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/staff/tickets');
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment(['id' => $ticket->id])
+            ->assertJsonFragment(['subject' => 'Admin visible ticket']);
     }
 
     public function test_ticket_owner_can_close_ticket()
