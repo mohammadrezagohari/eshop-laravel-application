@@ -5,61 +5,79 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BasketStoreRequest;
 use App\Http\Resources\BasketResource;
-use App\Repositories\BasketRepository\IEloquentBasketRepository;
+use App\Services\BasketService;
+use Illuminate\Support\Facades\Auth;
 
 class BasketController extends Controller
 {
-    /**
-     * @var IEloquentBasketRepository
-     */
-    protected $IEloquentBasketRepository;
+    protected $basketService;
 
-    public function __construct(IEloquentBasketRepository $IEloquentBasketRepository)
+    public function __construct(BasketService $basketService)
     {
-        $this->IEloquentBasketRepository = $IEloquentBasketRepository;
+        $this->basketService = $basketService;
     }
 
     public function CustomerIndex()
     {
-        $result = $this->IEloquentBasketRepository->allItems();
-        if (@$result == null)
+        $result = $this->basketService->listForCustomer(Auth::user(), $this->customerIdentity());
+
+        if ($result === null || $result->isEmpty()) {
             return response()->json(['message' => 'your basket is empty']);
+        }
+
         return BasketResource::collection($result);
     }
 
     public function CustomerStore(BasketStoreRequest $request)
     {
-        $user = @\Auth::user() ? \Auth::user() : null;
-        $result = $this->IEloquentBasketRepository
-            ->addItem($request->product, $request->count, $user, $request->cookie('identity'));
+        $result = $this->basketService
+            ->addItem($request->product, $request->count, Auth::user(), $this->customerIdentity());
 
-        if (@$result == null)
+        if ($result === null) {
             return response()->json(['message' => 'your basket is empty']);
-        return BasketResource::make($result);
+        }
+
+        return BasketResource::make($result)->response()->setStatusCode(200);
     }
 
     public function show($id)
     {
-        $result = $this->IEloquentBasketRepository->selectItem($id);
+        $result = $this->basketService->selectItem($id);
         $this->authorize('viewAny', $result);
+
         return BasketResource::make($result);
     }
 
     public function updateItem($id, BasketStoreRequest $request)
     {
-        $productId = $request->product;
-        $count = $request->count;
-        $result = $this->IEloquentBasketRepository->updateItem($id, $productId, $count);
-        if (@$result)
-            return BasketResource::make($result);;
+        $result = $this->basketService->updateItem($id, $request->product, $request->count);
+
+        if ($result) {
+            return BasketResource::make($result);
+        }
+
         return response()->json(['message' => 'fails']);
     }
 
     public function deleteItem($id)
     {
-        $result = $this->IEloquentBasketRepository->deleteItem($id);
-        if (@$result)
+        if ($this->basketService->deleteItem($id)) {
             return response()->json(['message' => 'success']);
+        }
+
         return response()->json(['message' => 'fails']);
+    }
+
+    private function customerIdentity()
+    {
+        $identity = request()->cookie('identity') ?: ($_COOKIE['identity'] ?? null);
+
+        if ($identity) {
+            return $identity;
+        }
+
+        parse_str(str_replace('; ', '&', request()->server('HTTP_COOKIE', '')), $cookies);
+
+        return $cookies['identity'] ?? null;
     }
 }

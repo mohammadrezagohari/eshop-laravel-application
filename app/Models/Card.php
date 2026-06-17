@@ -52,6 +52,11 @@ use Illuminate\Notifications\Notifiable;
 class Card extends Model
 {
     use HasFactory, Notifiable, UniqueIdentity, SoftDeletes;
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     #region Properties
     /******************
      * @var string[]

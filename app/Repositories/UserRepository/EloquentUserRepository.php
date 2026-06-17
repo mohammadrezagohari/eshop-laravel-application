@@ -14,6 +14,6 @@ class EloquentUserRepository implements IEloquentUserRepository
     }
     public function show($id)
     {
-        return User::find($id);;
+        return User::findOrFail($id);
     }
 }

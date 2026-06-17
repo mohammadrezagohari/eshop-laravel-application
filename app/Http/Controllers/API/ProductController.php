@@ -3,25 +3,24 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\ProductRepository\IEloquentProductRepository;
-use Illuminate\Http\Request;
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
-    protected $IEloquentPostRepository;
+    protected $productService;
 
-    public function __construct(IEloquentProductRepository $IEloquentProductRepository)
+    public function __construct(ProductService $productService)
     {
-        $this->IEloquentProductRepository = $IEloquentProductRepository;
+        $this->productService = $productService;
     }
 
     public function index()
     {
-        return $this->IEloquentProductRepository->listActive();
+        return $this->productService->listActive();
     }
 
     public function show($id)
     {
-        return $this->IEloquentProductRepository->showActive($id);
+        return $this->productService->showActive($id);
     }
 }

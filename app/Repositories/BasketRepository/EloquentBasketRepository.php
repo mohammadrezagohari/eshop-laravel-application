@@ -1,10 +1,7 @@
 <?php
 
-
 namespace App\Repositories\BasketRepository;
 
-
-use App\Http\Resources\BasketResource;
 use App\Models\Basket;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -13,82 +10,83 @@ class EloquentBasketRepository implements IEloquentBasketRepository
 {
     public function index()
     {
-
+        return Basket::query();
     }
 
-    public function addItem($productId, $count, $user = null, $identity = null)
+    public function addItem($productId, $count, User $user = null, $identity = null)
     {
         if (!$this->checkPolicy($user, $identity)) {
-            $identity = Str::uuid();
+            $identity = (string) Str::uuid();
         }
-        $basket = new Basket;
-        $this->setCookie($identity);
+
+        $basket = new Basket();
         $basket->cookie_identity = $identity;
-        $basket->user_id = @$user ? $user->id : null;
+        $basket->user_id = $user ? $user->id : null;
         $basket->save();
+
         $basket->Products()->syncWithPivotValues([$productId], ['count' => $count]);
-        $basket->product_id = $productId;
+        $basket->load('Products.User');
+
+        $this->setCookie($identity);
+
         return $basket;
     }
 
-
-    public function allItems()
+    public function allItems(User $user = null, $identity = null)
     {
-        //// get current user cookie
-        $cookieId = $_COOKIE['identity'];
-        /// are you added item in your basket without login?!
-        $basketCookieCount = Basket::whereCookieIdentity($cookieId)->count();
-        /// are you added item in your basket with authentication
-        $basketAuthUserCount = \Auth::user() ? Basket::whereUserId(\Auth::user()->id)->count() : null;
+        if ($user) {
+            return Basket::with('Products.User')
+                ->whereUserId($user->id)
+                ->get();
+        }
 
-        if (!@$basketAuthUserCount && !@$basketCookieCount)
-            return null;
+        if (!$identity) {
+            return collect();
+        }
 
-        if (@$basketAuthUserCount)
-            return BasketResource::collection(Basket::whereUserId(\Auth::user()->id)->get());
-
-        if (@$basketCookieCount)
-            return BasketResource::collection(Basket::whereCookieIdentity($cookieId)->get());
+        return Basket::with('Products.User')
+            ->whereCookieIdentity($identity)
+            ->get();
     }
 
     public function selectItem($id)
     {
-        return Basket::findOrFail($id);
+        return Basket::with('Products.User')->findOrFail($id);
     }
 
     public function deleteItem($id)
     {
-        $basket = Basket::findOrFail($id);
-        return $basket->delete();
+        return Basket::findOrFail($id)->delete();
     }
 
     public function updateItem($id, $product, $count)
     {
-        Basket::find($id)->Products()->where('id', '=', $product)->updateExistingPivot($id, ['count' => $count]);
-        return Basket::find($id);
+        $basket = Basket::with('Products.User')->findOrFail($id);
+
+        if (!$basket->Products()->where('products.id', $product)->exists()) {
+            return null;
+        }
+
+        $basket->Products()->updateExistingPivot($product, ['count' => $count]);
+
+        return $basket->fresh('Products.User');
     }
 
-    public function checkPolicy(User $user = null, $identityCookie)
+    public function checkPolicy(User $user = null, $identityCookie = null)
     {
-        /// are you added item in your basket without login?!
-        $BasketIdentityCookie = Basket::whereCookieIdentity($identityCookie)->count();
-        /// are you added item in your basket with authentication?
-        $basketAuthUserCount = @$user != null ? Basket::whereUserId($user->id)->count() : null;
-
-        if (@$basketAuthUserCount)
+        if ($user && Basket::whereUserId($user->id)->exists()) {
             return true;
+        }
 
-        if (@$BasketIdentityCookie)
+        if ($identityCookie && Basket::whereCookieIdentity($identityCookie)->exists()) {
             return true;
+        }
 
         return false;
     }
 
     public function setCookie($identity)
     {
-        $cookie_name = "identity";
-        setcookie($cookie_name, $identity, time() + (86400 * 30), "/");
+        setcookie('identity', $identity, time() + (86400 * 30), '/');
     }
-
-
 }

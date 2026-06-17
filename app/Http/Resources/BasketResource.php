@@ -20,9 +20,11 @@ class BasketResource extends JsonResource
      */
     public function toArray($request)
     {
+        $product = $this->Products->first();
+
         return [
-            'basket' => @$this->id,
-            'count' => @$this->Products()->where('id', $this->product_id)->first()->pivot->count,
+            'basket' => $this->id,
+            'count' => $product ? $product->pivot->count : null,
             'product' => ProductListResource::collection($this->Products),
         ];
     }

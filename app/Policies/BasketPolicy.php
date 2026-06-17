@@ -29,7 +29,8 @@ class BasketPolicy
      */
     public function viewAny(User $user=null)
     {
-        $identity = $_COOKIE['identity'];
+        $identity = request()->cookie('identity');
+
         return $this->IEloquentBasketRepository->checkPolicy($user, $identity);
     }
 

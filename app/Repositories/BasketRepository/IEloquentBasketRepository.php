@@ -2,16 +2,15 @@
 
 namespace App\Repositories\BasketRepository;
 
-use App\Models\Basket;
 use App\Models\User;
 
 interface IEloquentBasketRepository
 {
     public function index();
 
-    public function addItem($productId, $count, $userId = null, $identity = null);
+    public function addItem($productId, $count, User $user = null, $identity = null);
 
-    public function allItems();
+    public function allItems(User $user = null, $identity = null);
 
     public function selectItem($id);
 
@@ -19,7 +18,7 @@ interface IEloquentBasketRepository
 
     public function updateItem($id, $product, $count);
 
-    public function checkPolicy(User $user, Basket $basket);
+    public function checkPolicy(User $user = null, $identityCookie = null);
 
     public function setCookie($identity);
 }

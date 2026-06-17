@@ -4,24 +4,24 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Repositories\UserRepository\IEloquentUserRepository;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
-    protected $eloquentUserRepository;
+    protected $userService;
 
-    public function __construct(IEloquentUserRepository $eloquentUserRepository)
+    public function __construct(UserService $userService)
     {
-        $this->eloquentUserRepository = $eloquentUserRepository;
+        $this->userService = $userService;
     }
 
     public function index()
     {
-        return UserResource::collection($this->eloquentUserRepository->listActive());
+        return UserResource::collection($this->userService->listActive());
     }
 
     public function show($id)
     {
-        return UserResource::make($this->eloquentUserRepository->show($id));
+        return UserResource::make($this->userService->show($id));
     }
 }

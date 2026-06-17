@@ -3,36 +3,36 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\InvoiceResource;
-use App\Models\Card;
-use App\Notifications\InvoicePaid;
+use App\Services\CardService;
 
 class CardController extends Controller
 {
+    protected $cardService;
+
+    public function __construct(CardService $cardService)
+    {
+        $this->cardService = $cardService;
+    }
+
     public function sendNotification($cardId)
     {
-        $card = Card::findOrFail($cardId);
-        $cardResource = InvoiceResource::make($card);
-        $card->notify(new InvoicePaid($cardResource));
+        $this->cardService->sendInvoiceNotification($cardId);
+
+        return response()->json(['message' => 'success']);
     }
 
     public function getNotification($cardId)
     {
-        $card = Card::findOrFail($cardId);
-        return $card->notifications;
+        return $this->cardService->notifications($cardId);
     }
 
     public function UnreadNotification($cardId)
     {
-        $card = Card::findOrFail($cardId);
-        dd($card->unreadNotifications());
+        return $this->cardService->unreadNotifications($cardId);
     }
 
     public function ReadNotification($cardId)
     {
-        $card = Card::findOrFail($cardId);
-        return $card->readNotifications();
+        return $this->cardService->readNotifications($cardId);
     }
-
-
 }

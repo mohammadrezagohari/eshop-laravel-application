@@ -1,50 +1,101 @@
-<p align="center"><a href="https://www.linkedin.com/in/mohammad-reza-gohari/" target="_blank"><img src="https://media-exp1.licdn.com/dms/image/D5635AQEZHFGreTnUWw/profile-framedphoto-shrink_200_200/0/1650098775965?e=1652220000&v=beta&t=FgQ8cAtOe4knQ80U9dcpL6N7uUfg5dqXyY3gt_28tXc" width="400"></a></p>
-<p>
-    <h2 align="center">It's a simple of shop for your exam</h2>
-</p>
+# E-commerce Laravel API
 
-# If you wanna get Postman file 
+A Laravel-based e-commerce backend focused on API-first shopping workflows: authentication, product discovery, basket management, checkout data modeling, invoice notifications, and documented API usage through a Postman collection.
 
-Open [app.getpostman.com](https://app.getpostman.com/join-team?invite_code=1dede04b5829f1c5442575328d06ad2e&target_code=2615e07531e7dcb074ef37ac613a37d9) to view it in the browser.
+## Highlights
 
-## About Mohammad Reza
+- Token-based authentication with Laravel Sanctum.
+- Register, login, logout, and authenticated user endpoints.
+- Product listing and product detail endpoints.
+- Basket flow for guest or authenticated customers using user identity or cookie identity.
+- Basket item add, list, update, view, and delete operations.
+- Checkout-oriented database design with cards, card products, addresses, and payments.
+- Invoice notification endpoints backed by Laravel notifications.
+- Repository and service layers around core basket, product, card, user, and auth logic.
+- Feature tests for auth, products, baskets, cards, and users.
+- Postman collection included for API exploration.
 
-Full-stack Software Engineer passionate since developer with 7+ years (4+ years Laravel) of experience and a track record of Laravel, PHP, C#, Asp.Net, SQL,MySQL, MariaDB, JavaScript, React JS, Git flow, Asp.Net Core, MVC, Entity Framework. Strong Engineering Professional with a Bachelor of Engineering (B.E.) focused on Computer Science Engineering.
+## Tech Stack
 
-When I started to learn programming, I was 18 years old, and I selected Visual Basic programming, after then learn C# and Asp.Net and work on them for 4+ years. Well I was backend developer, After then I started to learn MVC Architecture and ORM Entity Framework. You know, I go to the other company to work with another skill, with Laravel. Laravel is very comparable with Asp.Net MVC, because Laravel has model, view, controller, blade engine, ORM Eloquent, Migration and Asp.Net MVC has model, view, controller, Razor engine, Entity Framework Code first, migration ...
-In military service time, I learn to JavaScript, It helps me to work with jQuery Ajax, and work with the libraries vue.js and React.js and use Next.js. absolutely, I can't work advance level with JS library. Now, I work in some projects with docker and microservice. I can get docker image for delivery to the DevOps.
+- PHP 8.3
+- Laravel 13
+- Laravel Sanctum
+- PHPUnit 12
+- MySQL or another Laravel-supported relational database
 
-- Laravel
+## Main API Areas
 
-- ASP.NET Core 
-- React.js 
-- Git
-- Next.js
-- Microsoft SQL Server
-- Docker
-- Vue.js
-- ASP.NET MVC
-- Search Engine Optimization (SEO)
-- C#
-- GitHub
-- TFS
-- Entity Framework
-- MySQL
-- PHP
-- Phalcon Framework
-- Object-Relational Mapping (ORM)
-- Webpack
-- npm
-- Nuget
-- Cascading Style Sheets (CSS)
-- Bootstrap
-- Git
-- Git flow
-- Scram 
-- Agile Methodologies
+### Authentication
 
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Create a user and return an access token |
+| `POST` | `/api/auth/login` | Authenticate a user and return an access token |
+| `POST` | `/api/auth/logout` | Revoke the current access token |
+| `GET` | `/api/user` | Return the authenticated user |
 
+### Products
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/products` | List visible products |
+| `GET` | `/api/products/show/{id}` | Show a product detail |
+
+### Basket Flow
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/baskets` | List the current customer's basket items |
+| `POST` | `/api/baskets/user/store` | Add a product to the basket |
+| `GET` | `/api/baskets/item/{id}` | Show a selected basket item |
+| `PATCH` | `/api/baskets/update/{id}` | Update a basket item quantity |
+| `DELETE` | `/api/baskets/delete/{id}` | Delete a basket item |
+
+### Card and Notifications
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/card/send-notification/{id}` | Send an invoice notification for a card |
+| `GET` | `/api/card/get-notification/{id}` | Retrieve card notifications |
+
+## Database Design
+
+The schema separates commerce concerns into focused tables:
+
+- `users` and `personal_access_tokens` for authentication.
+- `products`, `categories`, `details`, `prices`, and `category_product` for catalog data.
+- `baskets` and `basket_product` for basket state and item quantities.
+- `cards` and `card_product` for checkout snapshots.
+- `addresses` for customer delivery data.
+- `payments` for payment records, including bank name, tracking code, amount, status, and card linkage.
+- `notifications` for invoice notification history.
+
+## API Documentation
+
+Import `gandom.postman_collection.json` into Postman to explore the available endpoints and request payloads.
+
+## Local Setup
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+```
+
+Configure your database connection in `.env` before running migrations.
+
+## Tests
+
+Run the feature test suite with:
+
+```bash
+php artisan test
+```
+
+The current tests cover authentication, basket operations, card notifications, product endpoints, and user endpoints.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
