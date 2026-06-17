@@ -14,8 +14,8 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 - Ticket support flow with customer tickets and staff replies.
 - Checkout-oriented database design with cards, card products, addresses, and payments.
 - Invoice notification endpoints backed by Laravel notifications.
-- Repository and service layers around core basket, product, card, user, and auth logic.
-- Feature tests for auth, products, baskets, cards, and users.
+- Repository and service layers around core basket, product, card, user, ticket, and auth logic.
+- Feature tests for auth, role access, products, baskets, cards, tickets, and users.
 - Postman collection included for API exploration.
 
 ## Tech Stack
@@ -36,6 +36,8 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 | `POST` | `/api/auth/login` | Authenticate a user and return an access token |
 | `POST` | `/api/auth/logout` | Revoke the current access token |
 | `GET` | `/api/user` | Return the authenticated user |
+
+Public registration supports `customer` and `seller` roles. Admin users are intentionally excluded from public registration and should be promoted by an existing admin.
 
 ### Products
 
@@ -70,6 +72,10 @@ A Laravel-based e-commerce backend focused on API-first shopping workflows: auth
 | `PATCH` | `/api/admin/users/{id}/role` | Update a user role as an admin |
 
 Supported roles are `customer`, `seller`, and `admin`.
+
+- `customer`: can browse products, manage a basket, and create or manage their own support tickets.
+- `seller`: can access seller product ownership endpoints and reply to support tickets.
+- `admin`: can access all products, update user roles, and manage staff ticket workflows.
 
 ### Tickets
 
@@ -120,7 +126,15 @@ Run the feature test suite with:
 php artisan test
 ```
 
-The current tests cover authentication, role access, basket operations, card notifications, product endpoints, tickets, and user endpoints.
+The current suite covers authentication, role access, basket operations, card notifications, product endpoints, tickets, and user endpoints.
+
+Recent role and ticket coverage includes:
+
+- Seller registration and rejection of public admin registration.
+- Customer restrictions on seller and admin routes.
+- Seller restrictions on admin-only role updates.
+- Admin user role updates and all-product visibility.
+- Ticket creation, validation, staff replies, staff listing, ownership checks, and ticket closing.
 
 ## License
 
