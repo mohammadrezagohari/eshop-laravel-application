@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a99b132e1d13825832575e9b5703ed25",
+    "content-hash": "a0c015e9e5e3275863cc11f699dd36b8",
     "packages": [
         {
             "name": "brick/math",
@@ -578,6 +578,67 @@
                 }
             ],
             "time": "2025-12-03T09:33:47+00:00"
+        },
+        {
+            "name": "gohari/repository-pattern",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mohammadrezagohari/RepositoryPattern.git",
+                "reference": "a425ea9b31e5308326a99961b4539e0501cc045e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mohammadrezagohari/RepositoryPattern/zipball/a425ea9b31e5308326a99961b4539e0501cc045e",
+                "reference": "a425ea9b31e5308326a99961b4539e0501cc045e",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/database": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^10.0|^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Gohari\\RepositoryPattern\\RepositoryPatternServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Gohari\\RepositoryPattern\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "MohammadReza Gohari",
+                    "email": "eng.mr.gohari@gmail.com"
+                }
+            ],
+            "description": "A Laravel package for generating and using the repository pattern.",
+            "keywords": [
+                "artisan-command",
+                "eloquent",
+                "laravel",
+                "repository",
+                "repository-pattern"
+            ],
+            "support": {
+                "issues": "https://github.com/mohammadrezagohari/RepositoryPattern/issues",
+                "source": "https://github.com/mohammadrezagohari/RepositoryPattern/tree/v1.0.1"
+            },
+            "time": "2026-06-17T01:11:34+00:00"
         },
         {
             "name": "graham-campbell/result-type",
